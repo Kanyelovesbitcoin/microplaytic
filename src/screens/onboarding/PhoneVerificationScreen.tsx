@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { ProgressBar } from '../../components/ProgressBar';
@@ -48,49 +48,69 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
   };
 
   return (
-    <View style={styles.container}>
-      <ProgressBar currentStep={1} totalSteps={10} />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <ProgressBar currentStep={1} totalSteps={10} />
 
-      <View style={styles.content}>
-        <Text style={styles.title}>
-          {step === 'phone' ? 'Enter your phone number' : 'Enter verification code'}
-        </Text>
-        <Text style={styles.subtitle}>
-          {step === 'phone'
-            ? 'We\'ll send you a verification code'
-            : `We sent a code to ${phone}`}
-        </Text>
+          <View style={styles.content}>
+            <Text style={styles.title}>
+              {step === 'phone' ? 'Enter your phone number' : 'Enter verification code'}
+            </Text>
+            <Text style={styles.subtitle}>
+              {step === 'phone'
+                ? 'We\'ll send you a verification code'
+                : `We sent a code to ${phone}`}
+            </Text>
 
-        {step === 'phone' ? (
-          <Input
-            label="Phone Number"
-            placeholder="(555) 123-4567"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            maxLength={14}
-          />
-        ) : (
-          <Input
-            label="Verification Code"
-            placeholder="000000"
-            value={code}
-            onChangeText={setCode}
-            keyboardType="number-pad"
-            maxLength={6}
-          />
-        )}
-      </View>
+            {step === 'phone' ? (
+              <Input
+                label="Phone Number"
+                placeholder="(555) 123-4567"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+                maxLength={14}
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  Keyboard.dismiss();
+                  handleSendCode();
+                }}
+                blurOnSubmit={true}
+              />
+            ) : (
+              <Input
+                label="Verification Code"
+                placeholder="000000"
+                value={code}
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                maxLength={6}
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  Keyboard.dismiss();
+                  handleVerifyCode();
+                }}
+                blurOnSubmit={true}
+              />
+            )}
+          </View>
 
-      <View style={styles.footer}>
-        <Button
-          title={step === 'phone' ? 'Send Code' : 'Verify'}
-          onPress={step === 'phone' ? handleSendCode : handleVerifyCode}
-          loading={loading}
-          fullWidth
-        />
-      </View>
-    </View>
+          <View style={styles.footer}>
+            <Button
+              title={step === 'phone' ? 'Send Code' : 'Verify'}
+              onPress={step === 'phone' ? handleSendCode : handleVerifyCode}
+              loading={loading}
+              fullWidth
+            />
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 

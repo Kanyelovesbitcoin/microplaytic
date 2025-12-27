@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { ProgressBar } from '../../components/ProgressBar';
@@ -29,35 +29,49 @@ export const BasicInfoScreen: React.FC<BasicInfoScreenProps> = ({ onComplete }) 
   };
 
   return (
-    <View style={styles.container}>
-      <ProgressBar currentStep={4} totalSteps={10} />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <ProgressBar currentStep={4} totalSteps={10} />
 
-      <View style={styles.content}>
-        <Text style={styles.title}>Let's get to know you</Text>
-        <Text style={styles.subtitle}>Tell us a bit about yourself</Text>
+          <View style={styles.content}>
+            <Text style={styles.title}>Let's get to know you</Text>
+            <Text style={styles.subtitle}>Tell us a bit about yourself</Text>
 
-        <Input
-          label="Name"
-          placeholder="Your first name"
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words"
-        />
+            <Input
+              label="Name"
+              placeholder="Your first name"
+              value={name}
+              onChangeText={setName}
+              autoCapitalize="words"
+              returnKeyType="next"
+              blurOnSubmit={false}
+            />
 
-        <Input
-          label="Age"
-          placeholder="25"
-          value={age}
-          onChangeText={setAge}
-          keyboardType="number-pad"
-          maxLength={2}
-        />
-      </View>
+            <Input
+              label="Age"
+              placeholder="25"
+              value={age}
+              onChangeText={setAge}
+              keyboardType="number-pad"
+              maxLength={2}
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+                handleContinue();
+              }}
+            />
+          </View>
 
-      <View style={styles.footer}>
-        <Button title="Continue" onPress={handleContinue} fullWidth />
-      </View>
-    </View>
+          <View style={styles.footer}>
+            <Button title="Continue" onPress={handleContinue} fullWidth />
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
