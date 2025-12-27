@@ -21,17 +21,26 @@ Salt is a community-verified dating app exclusively for Salt Lake City residents
 ## Tech Stack
 
 - **Frontend**: React Native with Expo
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Backend**: Convex (Real-time database with TypeScript)
 - **Navigation**: React Navigation (Stack + Bottom Tabs)
 - **Language**: TypeScript
 - **Design**: Custom "Wasatch Winter" theme (Deep navy #002244, crisp white backgrounds)
+
+## Why Convex?
+
+Convex is perfect for iOS dating apps because:
+- **Real-time sync** - Messages and matches update instantly
+- **Offline support** - Works without internet, syncs when online
+- **Type-safe** - Full TypeScript support from database to UI
+- **Fast** - Optimized queries with automatic caching
+- **Simple** - No complex backend setup needed
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18+ and npm
 - Expo CLI: `npm install -g expo-cli`
-- Supabase account
+- Convex account (free at [convex.dev](https://convex.dev))
 - iOS development setup (for testing on device)
 
 ### Installation
@@ -47,66 +56,105 @@ Salt is a community-verified dating app exclusively for Salt Lake City residents
    npm install
    ```
 
-3. **Set up Supabase**
-   - Create a new project at [supabase.com](https://supabase.com)
-   - Run the SQL schema from `supabase-schema.sql` in your Supabase SQL Editor
-   - Copy your project URL and anon key
+3. **Set up Convex**
+   ```bash
+   # Install Convex CLI
+   npm install -g convex
 
-4. **Configure environment variables**
+   # Initialize Convex project (creates convex/ directory if not exists)
+   npx convex dev
+   ```
+
+   This will:
+   - Create a new Convex project (or link to existing)
+   - Deploy your schema and functions
+   - Give you a deployment URL
+
+4. **Seed the database with date spots**
+   ```bash
+   # In Convex dashboard or via CLI
+   npx convex run dateSpots:seedDateSpots
+   ```
+
+5. **Configure environment variables**
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` and add your Supabase credentials:
+   Edit `.env` and add your Convex deployment URL:
    ```
-   EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-   EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+   EXPO_PUBLIC_CONVEX_URL=https://your-project-name.convex.cloud
    ```
 
-5. **Start the development server**
+6. **Start the development server**
    ```bash
    npm start
    ```
 
-6. **Run on iOS**
+7. **Run on iOS**
    - Press `i` in the terminal, or
    - Scan the QR code with the Expo Go app on your iPhone
 
-## Database Schema
+## Convex Database Schema
 
-The app uses the following main tables in Supabase:
+The app uses the following collections in Convex:
 
 - **users** - User profiles with location, verification, preferences
 - **matches** - Mutual likes between users
 - **messages** - Chat messages with date spot suggestions
-- **date_spots** - Curated SLC venues (pre-populated with 20 spots)
-- **daily_batches** - User's daily profile batch
+- **dateSpots** - Curated SLC venues (20 pre-populated spots)
+- **dailyBatches** - User's daily profile batch
 - **reports** - User reports for moderation
 - **blocks** - Blocked user relationships
 - **swipes** - Like/pass history
 
-See `supabase-schema.sql` for the complete schema with Row Level Security policies.
+See `convex/schema.ts` for the complete schema definition.
+
+## Convex Functions
+
+### Queries (Read Data)
+- `users:getUserByPhone` - Find user by phone number
+- `users:getUser` - Get user by ID
+- `users:getApprovedUsers` - Get all approved users for matching
+- `matches:getMatches` - Get user's matches
+- `matches:getMessages` - Get messages for a match
+- `dateSpots:getAllDateSpots` - Get all date spots
+- `dateSpots:getDateSpotsByCategory` - Filter by category
+- `dailyBatches:getDailyBatch` - Get today's batch for user
+
+### Mutations (Write Data)
+- `users:createUser` - Create new user profile
+- `users:updateUser` - Update user profile
+- `users:updateAlgorithmPriorities` - Update matching preferences
+- `users:approveUser` - Approve user (admin)
+- `matches:swipe` - Record like/pass and create match if mutual
+- `matches:sendMessage` - Send chat message
+- `moderation:reportUser` - Report a user
+- `moderation:blockUser` - Block a user
+- `dailyBatches:generateDailyBatch` - Generate today's matches
 
 ## Project Structure
 
 ```
 Salt/
+├── convex/              # Convex backend
+│   ├── schema.ts        # Database schema
+│   ├── users.ts         # User queries & mutations
+│   ├── matches.ts       # Matching & messaging
+│   ├── dateSpots.ts     # Date spots & seeding
+│   ├── moderation.ts    # Reports & blocks
+│   └── dailyBatches.ts  # Daily batch algorithm
 ├── src/
-│   ├── components/       # Reusable UI components
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── ProgressBar.tsx
-│   │   └── ProfileCard.tsx (Polaroid design)
+│   ├── components/      # Reusable UI components
 │   ├── screens/
-│   │   ├── onboarding/   # 9 onboarding screens
-│   │   └── main/         # 4 main app screens
-│   ├── navigation/       # Navigation setup
-│   ├── services/         # Supabase client
-│   ├── theme/            # Design tokens (colors, typography, spacing)
-│   ├── types/            # TypeScript interfaces
-│   └── constants/        # Quiz questions, date spots
-├── supabase-schema.sql   # Database schema
-├── app.json              # Expo configuration
-└── App.tsx               # Root component
+│   │   ├── onboarding/  # 9 onboarding screens
+│   │   └── main/        # 4 main app screens
+│   ├── navigation/      # Navigation setup
+│   ├── services/        # Convex client
+│   ├── theme/           # Design tokens
+│   ├── types/           # TypeScript interfaces
+│   └── constants/       # Quiz questions
+├── app.json             # Expo configuration
+└── App.tsx              # Root component with Convex provider
 ```
 
 ## Onboarding Flow
@@ -120,6 +168,33 @@ Salt/
 7. Activity Preferences (skiing, hiking, climbing, biking)
 8. Sober Toggle
 9. Algorithm Priorities (4 sliders)
+
+## Using Convex in the App
+
+### Reading Data (Queries)
+```typescript
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
+
+function MyComponent() {
+  const dateSpots = useQuery(api.dateSpots.getAllDateSpots);
+  // dateSpots automatically updates in real-time!
+}
+```
+
+### Writing Data (Mutations)
+```typescript
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
+
+function MyComponent() {
+  const swipe = useMutation(api.matches.swipe);
+
+  const handleLike = async (userId, swipedUserId) => {
+    await swipe({ userId, swipedUserId, isLike: true });
+  };
+}
+```
 
 ## iOS Deployment
 
@@ -159,9 +234,10 @@ Salt complies with Apple App Store Guideline 4.3 by:
 Create a `.env` file with:
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=your_supabase_project_url
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+EXPO_PUBLIC_CONVEX_URL=https://your-project-name.convex.cloud
 ```
+
+Get this URL from your Convex dashboard after running `npx convex dev`.
 
 ## Development
 
@@ -171,6 +247,8 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 - `npm run android` - Run on Android
 - `npm run ios` - Run on iOS
 - `npm run web` - Run on web
+- `npx convex dev` - Start Convex backend in dev mode
+- `npx convex deploy` - Deploy Convex backend to production
 
 ### Design Tokens
 
@@ -184,22 +262,43 @@ The app uses the "Wasatch Winter" design system:
 
 See `src/theme/` for complete design token definitions.
 
+## Convex Development Tips
+
+### Watching the Database
+```bash
+# Open Convex dashboard to see data in real-time
+npx convex dashboard
+```
+
+### Running Functions Manually
+```bash
+# Seed date spots
+npx convex run dateSpots:seedDateSpots
+
+# Generate daily batch for a user
+npx convex run dailyBatches:generateDailyBatch '{"userId": "..."}'
+```
+
+### Viewing Logs
+All console.log statements in Convex functions appear in the dashboard logs.
+
 ## Roadmap
 
 ### Phase 1 (MVP)
 - [x] Core onboarding flow
 - [x] Profile cards with swipe functionality
-- [x] Basic matching system
+- [x] Convex backend with real-time sync
+- [x] Date spots database
 - [ ] Chat with date spot suggestions
 - [ ] Push notifications
-- [ ] Admin review queue
+- [ ] Admin review queue UI
 
 ### Phase 2 (Growth)
+- [ ] Improved matching algorithm based on preferences
 - [ ] AI-powered bio generation (GPT integration)
 - [ ] Video profile snippets
 - [ ] Group date events
 - [ ] Date spot reviews and ratings
-- [ ] Location-based matching algorithm
 
 ### Phase 3 (Scale)
 - [ ] Automated profile moderation with AI
@@ -213,7 +312,7 @@ See `src/theme/` for complete design token definitions.
 - Manual profile review for first 100-200 users
 - One-tap report system with preset reasons
 - Immediate block functionality
-- Row Level Security in Supabase
+- Convex enforces data validation at the backend
 - No infinite swiping (prevents abuse)
 
 ## Target Market
