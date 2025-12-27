@@ -8,36 +8,33 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  InputAccessoryView,
-  TouchableOpacity
 } from 'react-native';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { ProgressBar } from '../../components/ProgressBar';
 import { theme } from '../../theme';
 
-const INPUT_ACCESSORY_VIEW_ID = 'phoneInputAccessory';
-
 interface PhoneVerificationScreenProps {
-  onVerified: (phone: string) => void;
+  onVerified: (email: string) => void;
 }
 
 export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = ({
   onVerified,
 }) => {
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [step, setStep] = useState<'phone' | 'code'>('phone');
+  const [step, setStep] = useState<'email' | 'code'>('email');
   const [loading, setLoading] = useState(false);
 
   const handleSendCode = async () => {
-    if (!phone || phone.length < 10) {
-      Alert.alert('Error', 'Please enter a valid phone number');
+    if (!email || !email.includes('@')) {
+      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
+    Keyboard.dismiss();
     setLoading(true);
-    // TODO: Implement Supabase phone auth
+    // TODO: Implement email verification
     // For now, simulate sending code
     setTimeout(() => {
       setLoading(false);
@@ -51,12 +48,13 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
       return;
     }
 
+    Keyboard.dismiss();
     setLoading(true);
-    // TODO: Implement Supabase code verification
+    // TODO: Implement code verification
     // For now, simulate verification
     setTimeout(() => {
       setLoading(false);
-      onVerified(phone);
+      onVerified(email);
     }, 1000);
   };
 
@@ -64,7 +62,6 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
@@ -72,23 +69,25 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
 
           <View style={styles.content}>
             <Text style={styles.title}>
-              {step === 'phone' ? 'Enter your phone number' : 'Enter verification code'}
+              {step === 'email' ? 'Enter your email' : 'Enter verification code'}
             </Text>
             <Text style={styles.subtitle}>
-              {step === 'phone'
-                ? 'Tap anywhere outside to close keyboard'
-                : `We sent a code to ${phone}`}
+              {step === 'email'
+                ? 'We\'ll send you a verification code'
+                : `We sent a code to ${email}`}
             </Text>
 
-            {step === 'phone' ? (
+            {step === 'email' ? (
               <Input
-                label="Phone Number"
-                placeholder="(555) 123-4567"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                maxLength={14}
-                inputAccessoryViewID={INPUT_ACCESSORY_VIEW_ID}
+                label="Email Address"
+                placeholder="you@example.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="done"
+                onSubmitEditing={handleSendCode}
               />
             ) : (
               <Input
@@ -98,33 +97,22 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
                 onChangeText={setCode}
                 keyboardType="number-pad"
                 maxLength={6}
-                inputAccessoryViewID={INPUT_ACCESSORY_VIEW_ID}
+                returnKeyType="done"
+                onSubmitEditing={handleVerifyCode}
               />
             )}
           </View>
 
           <View style={styles.footer}>
             <Button
-              title={step === 'phone' ? 'Send Code' : 'Verify'}
-              onPress={step === 'phone' ? handleSendCode : handleVerifyCode}
+              title={step === 'email' ? 'Send Code' : 'Verify'}
+              onPress={step === 'email' ? handleSendCode : handleVerifyCode}
               loading={loading}
               fullWidth
             />
           </View>
         </View>
       </TouchableWithoutFeedback>
-
-      {/* Custom Done button above keyboard */}
-      <InputAccessoryView nativeID={INPUT_ACCESSORY_VIEW_ID}>
-        <View style={styles.keyboardAccessory}>
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={Keyboard.dismiss}
-          >
-            <Text style={styles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
-        </View>
-      </InputAccessoryView>
     </KeyboardAvoidingView>
   );
 };
@@ -153,23 +141,5 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: theme.spacing.xl,
     paddingBottom: theme.spacing['2xl'],
-  },
-  keyboardAccessory: {
-    backgroundColor: theme.colors.backgroundTertiary,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  doneButton: {
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.lg,
-  },
-  doneButtonText: {
-    color: theme.colors.primary,
-    fontSize: theme.typography.fontSize.base,
-    fontWeight: '600',
   },
 });

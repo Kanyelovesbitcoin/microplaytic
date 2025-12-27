@@ -23,7 +23,7 @@ interface OnboardingNavigatorProps {
 export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState({
-    phone: '',
+    email: '',
     localVerificationAnswers: [] as LocalVerificationAnswer[],
     name: '',
     age: 0,
@@ -40,8 +40,8 @@ export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComp
     nextStep();
   };
 
-  const handlePhoneVerified = (phone: string) => {
-    setOnboardingData({ ...onboardingData, phone });
+  const handleEmailVerified = (email: string) => {
+    setOnboardingData({ ...onboardingData, email });
     nextStep();
   };
 
@@ -78,7 +78,7 @@ export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComp
   const handleAlgorithmPriorities = async (priorities: AlgorithmPriorities) => {
     setOnboardingData({ ...onboardingData, algorithmPriorities: priorities });
 
-    // TODO: Save all onboarding data to Supabase
+    // TODO: Save all onboarding data to Convex
     console.log('Onboarding complete:', { ...onboardingData, algorithmPriorities: priorities });
 
     // Complete onboarding
@@ -87,7 +87,7 @@ export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComp
 
   const screens = [
     <WelcomeScreen key="welcome" onGetStarted={handleWelcome} />,
-    <PhoneVerificationScreen key="phone" onVerified={handlePhoneVerified} />,
+    <PhoneVerificationScreen key="email" onVerified={handleEmailVerified} />,
     <UtahQuizScreen key="quiz" onComplete={handleQuizComplete} />,
     <BasicInfoScreen key="basic" onComplete={handleBasicInfo} />,
     <PhotoUploadScreen key="photos" onComplete={handlePhotosUploaded} />,
