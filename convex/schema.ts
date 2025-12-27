@@ -49,10 +49,9 @@ export default defineSchema({
     soberPreference: v.union(v.literal("drinks"), v.literal("doesnt-drink"), v.literal("no-preference")),
 
     // Algorithm Priorities
-    proximityWeight: v.number(),
-    activityLevelWeight: v.number(),
-    sharedInterestsWeight: v.number(),
-    localResidentBoost: v.number(),
+    proximityWeight: v.number(), // Distance in miles (5-100)
+    activityLevelWeight: v.number(), // Priority level 1-5
+    sharedInterestsWeight: v.number(), // Weight percentage 0-100
   })
     .index("by_phone", ["phone"])
     .index("by_approved", ["isApproved"]),

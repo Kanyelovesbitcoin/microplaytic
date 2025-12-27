@@ -60,9 +60,8 @@ export type SoberPreference = 'drinks' | 'doesnt-drink' | 'no-preference';
 
 export interface AlgorithmPriorities {
   proximityWeight: number;        // Distance in miles (5-100)
-  activityLevelWeight: number;    // Weight 0-100%
+  activityLevelWeight: number;    // Priority level 1-5 (1=Very Low, 5=Very High)
   sharedInterestsWeight: number;  // Weight 0-100%
-  localResidentBoost: number;     // Weight 0-100%
 }
 
 export interface LocalVerificationQuestion {

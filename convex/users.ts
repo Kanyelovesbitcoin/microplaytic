@@ -39,10 +39,9 @@ export const createUser = mutation({
       }),
     }),
     soberPreference: v.union(v.literal("drinks"), v.literal("doesnt-drink"), v.literal("no-preference")),
-    proximityWeight: v.number(),
-    activityLevelWeight: v.number(),
-    sharedInterestsWeight: v.number(),
-    localResidentBoost: v.number(),
+    proximityWeight: v.number(), // Miles
+    activityLevelWeight: v.number(), // 1-5
+    sharedInterestsWeight: v.number(), // 0-100%
   },
   handler: async (ctx, args) => {
     const userId = await ctx.db.insert("users", {
@@ -123,10 +122,9 @@ export const updateUser = mutation({
 export const updateAlgorithmPriorities = mutation({
   args: {
     userId: v.id("users"),
-    proximityWeight: v.number(),
-    activityLevelWeight: v.number(),
-    sharedInterestsWeight: v.number(),
-    localResidentBoost: v.number(),
+    proximityWeight: v.number(), // Miles
+    activityLevelWeight: v.number(), // 1-5
+    sharedInterestsWeight: v.number(), // 0-100%
   },
   handler: async (ctx, args) => {
     const { userId, ...priorities } = args;

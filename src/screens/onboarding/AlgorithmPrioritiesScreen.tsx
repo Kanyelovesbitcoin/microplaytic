@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Button } from '../../components/Button';
 import { ProgressBar } from '../../components/ProgressBar';
@@ -15,15 +15,21 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
 }) => {
   const [priorities, setPriorities] = useState<AlgorithmPriorities>({
     proximityWeight: 25, // Miles
-    activityLevelWeight: 50, // Percentage
+    activityLevelWeight: 3, // Level 1-5 (default: Medium)
     sharedInterestsWeight: 50, // Percentage
-    localResidentBoost: 50, // Percentage
   });
 
-  const updatePriority = (key: keyof AlgorithmPriorities, value: number) => {
+  const updateSlider = (key: 'proximityWeight' | 'sharedInterestsWeight', value: number) => {
     setPriorities({
       ...priorities,
       [key]: Math.round(value),
+    });
+  };
+
+  const updateActivityLevel = (level: number) => {
+    setPriorities({
+      ...priorities,
+      activityLevelWeight: level,
     });
   };
 
@@ -31,43 +37,12 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
     onComplete(priorities);
   };
 
-  const sliders = [
-    {
-      key: 'proximityWeight' as const,
-      label: 'Proximity',
-      description: 'Maximum distance for matches',
-      unit: 'mi',
-      min: 5,
-      max: 100,
-      step: 5,
-    },
-    {
-      key: 'activityLevelWeight' as const,
-      label: 'Activity Level',
-      description: 'Similar outdoor interests',
-      unit: '%',
-      min: 0,
-      max: 100,
-      step: 10,
-    },
-    {
-      key: 'sharedInterestsWeight' as const,
-      label: 'Shared Interests',
-      description: 'Common hobbies and lifestyle',
-      unit: '%',
-      min: 0,
-      max: 100,
-      step: 10,
-    },
-    {
-      key: 'localResidentBoost' as const,
-      label: 'Local Resident Boost',
-      description: 'Prioritize long-time locals',
-      unit: '%',
-      min: 0,
-      max: 100,
-      step: 10,
-    },
+  const activityLevels = [
+    { value: 1, label: 'Very Low' },
+    { value: 2, label: 'Low' },
+    { value: 3, label: 'Medium' },
+    { value: 4, label: 'High' },
+    { value: 5, label: 'Very High' },
   ];
 
   return (
@@ -80,26 +55,73 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
           Adjust what matters most to you. You can change this anytime.
         </Text>
 
-        {sliders.map((slider) => (
-          <View key={slider.key} style={styles.sliderContainer}>
-            <View style={styles.sliderHeader}>
-              <Text style={styles.sliderLabel}>{slider.label}</Text>
-              <Text style={styles.sliderValue}>{priorities[slider.key]}{slider.unit}</Text>
-            </View>
-            <Text style={styles.sliderDescription}>{slider.description}</Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={slider.min}
-              maximumValue={slider.max}
-              step={slider.step}
-              value={priorities[slider.key]}
-              onValueChange={(value) => updatePriority(slider.key, value)}
-              minimumTrackTintColor={theme.colors.primary}
-              maximumTrackTintColor={theme.colors.border}
-              thumbTintColor={theme.colors.primary}
-            />
+        {/* Proximity Slider */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>Proximity</Text>
+            <Text style={styles.sectionValue}>{priorities.proximityWeight}mi</Text>
           </View>
-        ))}
+          <Text style={styles.sectionDescription}>Maximum distance for matches</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={5}
+            maximumValue={100}
+            step={5}
+            value={priorities.proximityWeight}
+            onValueChange={(value) => updateSlider('proximityWeight', value)}
+            minimumTrackTintColor={theme.colors.primary}
+            maximumTrackTintColor={theme.colors.border}
+            thumbTintColor={theme.colors.primary}
+          />
+        </View>
+
+        {/* Activity Level Buttons */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Activity Level Priority</Text>
+          <Text style={styles.sectionDescription}>How important are similar outdoor interests?</Text>
+          <View style={styles.buttonGroup}>
+            {activityLevels.map((level) => (
+              <TouchableOpacity
+                key={level.value}
+                style={[
+                  styles.levelButton,
+                  priorities.activityLevelWeight === level.value && styles.levelButtonActive,
+                ]}
+                onPress={() => updateActivityLevel(level.value)}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.levelButtonText,
+                    priorities.activityLevelWeight === level.value && styles.levelButtonTextActive,
+                  ]}
+                >
+                  {level.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Shared Interests Slider */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>Shared Interests</Text>
+            <Text style={styles.sectionValue}>{priorities.sharedInterestsWeight}%</Text>
+          </View>
+          <Text style={styles.sectionDescription}>Common hobbies and lifestyle</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={100}
+            step={10}
+            value={priorities.sharedInterestsWeight}
+            onValueChange={(value) => updateSlider('sharedInterestsWeight', value)}
+            minimumTrackTintColor={theme.colors.primary}
+            maximumTrackTintColor={theme.colors.border}
+            thumbTintColor={theme.colors.primary}
+          />
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -130,33 +152,61 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.xl,
   },
-  sliderContainer: {
-    marginBottom: theme.spacing.xl,
+  section: {
+    marginBottom: theme.spacing['2xl'],
   },
-  sliderHeader: {
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: theme.spacing.xs,
   },
-  sliderLabel: {
+  sectionLabel: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: '600',
     color: theme.colors.text,
   },
-  sliderValue: {
+  sectionValue: {
     fontSize: theme.typography.fontSize.base,
     fontWeight: '600',
     color: theme.colors.primary,
   },
-  sliderDescription: {
+  sectionDescription: {
     fontSize: theme.typography.fontSize.sm,
     color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
   },
   slider: {
     width: '100%',
     height: 40,
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  levelButton: {
+    flex: 1,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.xs,
+    backgroundColor: theme.colors.frostedGlass,
+    borderWidth: 2,
+    borderColor: theme.colors.frostedGlassBorder,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    ...theme.shadows.frosted,
+  },
+  levelButtonActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  levelButtonText: {
+    fontSize: theme.typography.fontSize.xs,
+    fontWeight: '600',
+    color: theme.colors.text,
+    textAlign: 'center',
+  },
+  levelButtonTextActive: {
+    color: theme.colors.textLight,
   },
   footer: {
     paddingHorizontal: theme.spacing.xl,
