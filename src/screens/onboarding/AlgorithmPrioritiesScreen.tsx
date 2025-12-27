@@ -14,10 +14,10 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
   onComplete,
 }) => {
   const [priorities, setPriorities] = useState<AlgorithmPriorities>({
-    proximityWeight: 50,
-    activityLevelWeight: 50,
-    sharedInterestsWeight: 50,
-    localResidentBoost: 50,
+    proximityWeight: 25, // Miles
+    activityLevelWeight: 50, // Percentage
+    sharedInterestsWeight: 50, // Percentage
+    localResidentBoost: 50, // Percentage
   });
 
   const updatePriority = (key: keyof AlgorithmPriorities, value: number) => {
@@ -35,22 +35,38 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
     {
       key: 'proximityWeight' as const,
       label: 'Proximity',
-      description: 'How close they are to you',
+      description: 'Maximum distance for matches',
+      unit: 'mi',
+      min: 5,
+      max: 100,
+      step: 5,
     },
     {
       key: 'activityLevelWeight' as const,
       label: 'Activity Level',
       description: 'Similar outdoor interests',
+      unit: '%',
+      min: 0,
+      max: 100,
+      step: 10,
     },
     {
       key: 'sharedInterestsWeight' as const,
       label: 'Shared Interests',
       description: 'Common hobbies and lifestyle',
+      unit: '%',
+      min: 0,
+      max: 100,
+      step: 10,
     },
     {
       key: 'localResidentBoost' as const,
       label: 'Local Resident Boost',
       description: 'Prioritize long-time locals',
+      unit: '%',
+      min: 0,
+      max: 100,
+      step: 10,
     },
   ];
 
@@ -68,14 +84,14 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
           <View key={slider.key} style={styles.sliderContainer}>
             <View style={styles.sliderHeader}>
               <Text style={styles.sliderLabel}>{slider.label}</Text>
-              <Text style={styles.sliderValue}>{priorities[slider.key]}%</Text>
+              <Text style={styles.sliderValue}>{priorities[slider.key]}{slider.unit}</Text>
             </View>
             <Text style={styles.sliderDescription}>{slider.description}</Text>
             <Slider
               style={styles.slider}
-              minimumValue={0}
-              maximumValue={100}
-              step={10}
+              minimumValue={slider.min}
+              maximumValue={slider.max}
+              step={slider.step}
               value={priorities[slider.key]}
               onValueChange={(value) => updatePriority(slider.key, value)}
               minimumTrackTintColor={theme.colors.primary}
