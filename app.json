@@ -1,0 +1,71 @@
+{
+  "expo": {
+    "name": "Salt",
+    "slug": "salt-slc",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "salt",
+    "platforms": ["ios"],
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#002244"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.salt.slc",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Salt needs access to your photos to upload profile pictures.",
+        "NSCameraUsageDescription": "Salt needs access to your camera to take profile pictures.",
+        "NSLocationWhenInUseUsageDescription": "Salt needs your location to verify you're in Salt Lake City and show you nearby matches."
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#002244"
+      },
+      "package": "com.salt.slc",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ],
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Salt to use your location to verify you're in Salt Lake City and show you nearby matches."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Salt needs access to your photos to upload profile pictures.",
+          "cameraPermission": "Salt needs access to your camera to take profile pictures."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    }
+  }
+}
