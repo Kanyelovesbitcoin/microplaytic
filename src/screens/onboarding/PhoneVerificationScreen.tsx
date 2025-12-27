@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  InputAccessoryView,
+  TouchableOpacity
+} from 'react-native';
 import { Input } from '../../components/Input';
 import { Button } from '../../components/Button';
 import { ProgressBar } from '../../components/ProgressBar';
 import { theme } from '../../theme';
+
+const INPUT_ACCESSORY_VIEW_ID = 'phoneInputAccessory';
 
 interface PhoneVerificationScreenProps {
   onVerified: (phone: string) => void;
@@ -63,7 +76,7 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
             </Text>
             <Text style={styles.subtitle}>
               {step === 'phone'
-                ? 'We\'ll send you a verification code'
+                ? 'Tap anywhere outside to close keyboard'
                 : `We sent a code to ${phone}`}
             </Text>
 
@@ -75,12 +88,7 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
                 maxLength={14}
-                returnKeyType="done"
-                onSubmitEditing={() => {
-                  Keyboard.dismiss();
-                  handleSendCode();
-                }}
-                blurOnSubmit={true}
+                inputAccessoryViewID={INPUT_ACCESSORY_VIEW_ID}
               />
             ) : (
               <Input
@@ -90,12 +98,7 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
                 onChangeText={setCode}
                 keyboardType="number-pad"
                 maxLength={6}
-                returnKeyType="done"
-                onSubmitEditing={() => {
-                  Keyboard.dismiss();
-                  handleVerifyCode();
-                }}
-                blurOnSubmit={true}
+                inputAccessoryViewID={INPUT_ACCESSORY_VIEW_ID}
               />
             )}
           </View>
@@ -110,6 +113,18 @@ export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = (
           </View>
         </View>
       </TouchableWithoutFeedback>
+
+      {/* Custom Done button above keyboard */}
+      <InputAccessoryView nativeID={INPUT_ACCESSORY_VIEW_ID}>
+        <View style={styles.keyboardAccessory}>
+          <TouchableOpacity
+            style={styles.doneButton}
+            onPress={Keyboard.dismiss}
+          >
+            <Text style={styles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
+        </View>
+      </InputAccessoryView>
     </KeyboardAvoidingView>
   );
 };
@@ -138,5 +153,23 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: theme.spacing.xl,
     paddingBottom: theme.spacing['2xl'],
+  },
+  keyboardAccessory: {
+    backgroundColor: theme.colors.backgroundTertiary,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  doneButton: {
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  doneButtonText: {
+    color: theme.colors.primary,
+    fontSize: theme.typography.fontSize.base,
+    fontWeight: '600',
   },
 });
