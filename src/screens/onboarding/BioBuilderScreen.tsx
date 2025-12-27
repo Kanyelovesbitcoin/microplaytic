@@ -66,7 +66,7 @@ export const BioBuilderScreen: React.FC<BioBuilderScreenProps> = ({ onComplete }
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={6} totalSteps={10} />
+      <ProgressBar currentStep={4} totalSteps={7} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Let's create your bio</Text>

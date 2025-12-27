@@ -42,7 +42,7 @@ export const ActivityPreferencesScreen: React.FC<ActivityPreferencesScreenProps>
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={7} totalSteps={10} />
+      <ProgressBar currentStep={5} totalSteps={7} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>What do you love to do?</Text>

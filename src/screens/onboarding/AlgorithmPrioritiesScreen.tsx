@@ -56,7 +56,7 @@ export const AlgorithmPrioritiesScreen: React.FC<AlgorithmPrioritiesScreenProps>
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={9} totalSteps={10} />
+      <ProgressBar currentStep={7} totalSteps={7} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Customize your matches</Text>

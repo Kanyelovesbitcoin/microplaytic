@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
-import { EmailVerificationScreen } from '../screens/onboarding/EmailVerificationScreen';
 import { UtahQuizScreen } from '../screens/onboarding/UtahQuizScreen';
 import { BasicInfoScreen } from '../screens/onboarding/BasicInfoScreen';
 import { PhotoUploadScreen } from '../screens/onboarding/PhotoUploadScreen';
@@ -37,11 +36,6 @@ export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComp
   const nextStep = () => setCurrentStep(currentStep + 1);
 
   const handleWelcome = () => {
-    nextStep();
-  };
-
-  const handleEmailVerified = (email: string) => {
-    setOnboardingData({ ...onboardingData, email });
     nextStep();
   };
 
@@ -87,7 +81,6 @@ export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComp
 
   const screens = [
     <WelcomeScreen key="welcome" onGetStarted={handleWelcome} />,
-    <EmailVerificationScreen key="email" onVerified={handleEmailVerified} />,
     <UtahQuizScreen key="quiz" onComplete={handleQuizComplete} />,
     <BasicInfoScreen key="basic" onComplete={handleBasicInfo} />,
     <PhotoUploadScreen key="photos" onComplete={handlePhotosUploaded} />,

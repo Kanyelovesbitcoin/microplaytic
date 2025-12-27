@@ -38,7 +38,7 @@ export const SoberToggleScreen: React.FC<SoberToggleScreenProps> = ({ onComplete
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={8} totalSteps={10} />
+      <ProgressBar currentStep={6} totalSteps={7} />
 
       <View style={styles.content}>
         <Text style={styles.title}>Drinking preference</Text>

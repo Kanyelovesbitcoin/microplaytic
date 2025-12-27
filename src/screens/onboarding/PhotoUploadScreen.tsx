@@ -56,7 +56,7 @@ export const PhotoUploadScreen: React.FC<PhotoUploadScreenProps> = ({ onComplete
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={5} totalSteps={10} />
+      <ProgressBar currentStep={3} totalSteps={7} />
 
       <View style={styles.content}>
         <Text style={styles.title}>Add your photos</Text>

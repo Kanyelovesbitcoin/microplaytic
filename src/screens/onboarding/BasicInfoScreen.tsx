@@ -35,7 +35,7 @@ export const BasicInfoScreen: React.FC<BasicInfoScreenProps> = ({ onComplete }) 
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          <ProgressBar currentStep={4} totalSteps={10} />
+          <ProgressBar currentStep={2} totalSteps={7} />
 
           <View style={styles.content}>
             <Text style={styles.title}>Let's get to know you</Text>

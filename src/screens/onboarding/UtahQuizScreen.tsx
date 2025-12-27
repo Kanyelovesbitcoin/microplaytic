@@ -36,7 +36,7 @@ export const UtahQuizScreen: React.FC<UtahQuizScreenProps> = ({ onComplete }) =>
 
   return (
     <View style={styles.container}>
-      <ProgressBar currentStep={3} totalSteps={10} />
+      <ProgressBar currentStep={1} totalSteps={7} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Let's verify you're a local</Text>
