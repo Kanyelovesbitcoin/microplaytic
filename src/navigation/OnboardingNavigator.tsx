@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
-import { PhoneVerificationScreen } from '../screens/onboarding/PhoneVerificationScreen';
+import { EmailVerificationScreen } from '../screens/onboarding/EmailVerificationScreen';
 import { UtahQuizScreen } from '../screens/onboarding/UtahQuizScreen';
 import { BasicInfoScreen } from '../screens/onboarding/BasicInfoScreen';
 import { PhotoUploadScreen } from '../screens/onboarding/PhotoUploadScreen';
@@ -87,7 +87,7 @@ export const OnboardingNavigator: React.FC<OnboardingNavigatorProps> = ({ onComp
 
   const screens = [
     <WelcomeScreen key="welcome" onGetStarted={handleWelcome} />,
-    <PhoneVerificationScreen key="email" onVerified={handleEmailVerified} />,
+    <EmailVerificationScreen key="email" onVerified={handleEmailVerified} />,
     <UtahQuizScreen key="quiz" onComplete={handleQuizComplete} />,
     <BasicInfoScreen key="basic" onComplete={handleBasicInfo} />,
     <PhotoUploadScreen key="photos" onComplete={handlePhotosUploaded} />,

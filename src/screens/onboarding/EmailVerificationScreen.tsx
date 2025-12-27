@@ -14,11 +14,11 @@ import { Button } from '../../components/Button';
 import { ProgressBar } from '../../components/ProgressBar';
 import { theme } from '../../theme';
 
-interface PhoneVerificationScreenProps {
+interface EmailVerificationScreenProps {
   onVerified: (email: string) => void;
 }
 
-export const PhoneVerificationScreen: React.FC<PhoneVerificationScreenProps> = ({
+export const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
   onVerified,
 }) => {
   const [email, setEmail] = useState('');
