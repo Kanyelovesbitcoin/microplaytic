@@ -1,70 +1,52 @@
-import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
 
-// Create a new user
-export const createUser = mutation({
+/**
+ * Create or get user by device ID
+ */
+export const getOrCreateUser = mutation({
   args: {
-    phone: v.string(),
-    name: v.string(),
-    age: v.number(),
-    photos: v.array(v.string()),
-    bio: v.optional(v.string()),
-    latitude: v.optional(v.number()),
-    longitude: v.optional(v.number()),
-    city: v.string(),
-    isTransplant: v.optional(v.boolean()),
-    localVerificationAnswers: v.array(
-      v.object({
-        questionId: v.string(),
-        question: v.string(),
-        answer: v.string(),
-      })
-    ),
-    activityPreferences: v.object({
-      skiing: v.object({
-        interest: v.boolean(),
-        level: v.optional(v.union(v.literal("beginner"), v.literal("intermediate"), v.literal("advanced"), v.literal("expert"))),
-      }),
-      hiking: v.object({
-        interest: v.boolean(),
-        frequency: v.optional(v.union(v.literal("rarely"), v.literal("monthly"), v.literal("weekly"), v.literal("daily"))),
-      }),
-      climbing: v.object({
-        interest: v.boolean(),
-        level: v.optional(v.union(v.literal("beginner"), v.literal("intermediate"), v.literal("advanced"))),
-      }),
-      biking: v.object({
-        interest: v.boolean(),
-        type: v.optional(v.union(v.literal("road"), v.literal("mountain"), v.literal("both"))),
-      }),
-    }),
-    soberPreference: v.union(v.literal("drinks"), v.literal("doesnt-drink"), v.literal("no-preference")),
-    proximityWeight: v.number(), // Miles
-    activityLevelWeight: v.number(), // 1-5
-    sharedInterestsWeight: v.number(), // 0-100%
+    deviceId: v.string(),
   },
   handler: async (ctx, args) => {
+    // Check if user already exists
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_device", (q) => q.eq("deviceId", args.deviceId))
+      .first();
+
+    if (existingUser) {
+      return existingUser._id;
+    }
+
+    // Create new user
     const userId = await ctx.db.insert("users", {
-      ...args,
-      isVerified: true,
-      isApproved: false, // Requires admin approval
+      deviceId: args.deviceId,
+      createdAt: Date.now(),
+      subscriptionStatus: "free",
+      scanCount: 0,
     });
+
     return userId;
   },
 });
 
-// Get user by phone
-export const getUserByPhone = query({
-  args: { phone: v.string() },
+/**
+ * Get user by device ID
+ */
+export const getUserByDevice = query({
+  args: { deviceId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("users")
-      .withIndex("by_phone", (q) => q.eq("phone", args.phone))
+      .withIndex("by_device", (q) => q.eq("deviceId", args.deviceId))
       .first();
   },
 });
 
-// Get user by ID
+/**
+ * Get user by ID
+ */
 export const getUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
@@ -72,72 +54,64 @@ export const getUser = query({
   },
 });
 
-// Get approved users for matching
-export const getApprovedUsers = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_approved", (q) => q.eq("isApproved", true))
-      .collect();
-  },
-});
-
-// Update user profile
-export const updateUser = mutation({
+/**
+ * Update user subscription status
+ */
+export const updateSubscription = mutation({
   args: {
     userId: v.id("users"),
-    name: v.optional(v.string()),
-    age: v.optional(v.number()),
-    photos: v.optional(v.array(v.string())),
-    bio: v.optional(v.string()),
-    activityPreferences: v.optional(v.object({
-      skiing: v.object({
-        interest: v.boolean(),
-        level: v.optional(v.union(v.literal("beginner"), v.literal("intermediate"), v.literal("advanced"), v.literal("expert"))),
-      }),
-      hiking: v.object({
-        interest: v.boolean(),
-        frequency: v.optional(v.union(v.literal("rarely"), v.literal("monthly"), v.literal("weekly"), v.literal("daily"))),
-      }),
-      climbing: v.object({
-        interest: v.boolean(),
-        level: v.optional(v.union(v.literal("beginner"), v.literal("intermediate"), v.literal("advanced"))),
-      }),
-      biking: v.object({
-        interest: v.boolean(),
-        type: v.optional(v.union(v.literal("road"), v.literal("mountain"), v.literal("both"))),
-      }),
-    })),
-    soberPreference: v.optional(v.union(v.literal("drinks"), v.literal("doesnt-drink"), v.literal("no-preference"))),
+    subscriptionStatus: v.union(v.literal("free"), v.literal("premium")),
+    subscriptionExpiresAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId, ...updates } = args;
-    await ctx.db.patch(userId, updates);
-    return userId;
+    await ctx.db.patch(args.userId, {
+      subscriptionStatus: args.subscriptionStatus,
+      subscriptionExpiresAt: args.subscriptionExpiresAt,
+    });
   },
 });
 
-// Update algorithm priorities
-export const updateAlgorithmPriorities = mutation({
-  args: {
-    userId: v.id("users"),
-    proximityWeight: v.number(), // Miles
-    activityLevelWeight: v.number(), // 1-5
-    sharedInterestsWeight: v.number(), // 0-100%
-  },
-  handler: async (ctx, args) => {
-    const { userId, ...priorities } = args;
-    await ctx.db.patch(userId, priorities);
-    return userId;
-  },
-});
-
-// Approve user (admin function)
-export const approveUser = mutation({
+/**
+ * Check if user can scan (respects free tier limits)
+ */
+export const canUserScan = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, { isApproved: true });
-    return args.userId;
+    const user = await ctx.db.get(args.userId);
+
+    if (!user) {
+      return { canScan: false, reason: "User not found" };
+    }
+
+    // Premium users can always scan
+    if (user.subscriptionStatus === "premium") {
+      // Check if subscription is still valid
+      if (user.subscriptionExpiresAt && user.subscriptionExpiresAt < Date.now()) {
+        return { canScan: false, reason: "Subscription expired" };
+      }
+      return { canScan: true, scansRemaining: -1 }; // -1 means unlimited
+    }
+
+    // Free tier: 5 scans per week
+    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    const recentScans = await ctx.db
+      .query("scans")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.gte(q.field("scannedAt"), oneWeekAgo))
+      .collect();
+
+    const scansThisWeek = recentScans.length;
+    const scansRemaining = Math.max(0, 5 - scansThisWeek);
+
+    if (scansThisWeek >= 5) {
+      return {
+        canScan: false,
+        reason: "Weekly scan limit reached (5 scans per week for free tier)",
+        scansRemaining: 0
+      };
+    }
+
+    return { canScan: true, scansRemaining };
   },
 });
