@@ -1,10 +1,9 @@
 import React from 'react';
 import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { DiscoverScreen } from '../screens/main/DiscoverScreen';
-import { MatchesScreen } from '../screens/main/MatchesScreen';
-import { DateSpotsScreen } from '../screens/main/DateSpotsScreen';
-import { ProfileScreen } from '../screens/main/ProfileScreen';
+import { HomeScreen } from '../screens/main/HomeScreen';
+import { HistoryScreen } from '../screens/main/HistoryScreen';
+import { AlternativesScreen } from '../screens/main/AlternativesScreen';
 import { theme } from '../theme';
 
 const Tab = createBottomTabNavigator();
@@ -30,31 +29,24 @@ export const MainTabNavigator: React.FC = () => {
       }}
     >
       <Tab.Screen
-        name="Discover"
-        component={DiscoverScreen}
+        name="Home"
+        component={HomeScreen}
         options={{
-          tabBarIcon: () => <TabIcon icon="🔍" />,
+          tabBarIcon: () => <TabIcon icon="🏠" />,
         }}
       />
       <Tab.Screen
-        name="Matches"
-        component={MatchesScreen}
+        name="History"
+        component={HistoryScreen}
         options={{
-          tabBarIcon: () => <TabIcon icon="💬" />,
+          tabBarIcon: () => <TabIcon icon="📋" />,
         }}
       />
       <Tab.Screen
-        name="Date Spots"
-        component={DateSpotsScreen}
+        name="Alternatives"
+        component={AlternativesScreen}
         options={{
-          tabBarIcon: () => <TabIcon icon="📍" />,
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          tabBarIcon: () => <TabIcon icon="👤" />,
+          tabBarIcon: () => <TabIcon icon="✨" />,
         }}
       />
     </Tab.Navigator>
